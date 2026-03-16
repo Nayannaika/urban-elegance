@@ -1,0 +1,93 @@
+<div class="space-y-6">
+  <!-- Header -->
+  <div class="flex items-center justify-between">
+    <div>
+      <h1 class="text-2xl font-bold font-outfit text-slate-900 tracking-tight">Business Analytics</h1>
+      <p class="text-sm text-slate-500 mt-1">Deep dive into sales trends and inventory performance markers.</p>
+    </div>
+    
+    <button (click)="fetchAnalytics()" class="p-2 bg-indigo-50 text-indigo-600 hover:bg-indigo-100 rounded-lg transition-colors flex items-center gap-2 text-sm font-semibold" [class.opacity-50]="isLoadingSales()">
+      <svg class="w-4 h-4" [class.animate-spin]="isLoadingSales()" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+      </svg>
+      Refresh Data
+    </button>
+  </div>
+
+  <div *ngIf="error()" class="p-4 bg-rose-50 border border-rose-100 rounded-2xl flex items-center gap-3 text-rose-700">
+      <svg class="w-6 h-6 text-rose-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+      <span class="font-medium">{{ error() }}</span>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <!-- Sales Chart Container -->
+    <div class="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+      <div class="flex items-center justify-between mb-6">
+         <h2 class="font-bold text-slate-900 font-outfit">Revenue Chronology</h2>
+         <span class="bg-indigo-50 text-indigo-600 px-3 py-1 rounded-full text-xs font-bold">Past 30 Days</span>
+      </div>
+
+      <div *ngIf="isLoadingSales()" class="h-64 flex flex-col items-center justify-center space-y-4">
+         <div class="w-8 h-8 border-2 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></div>
+      </div>
+
+      <!-- CSS Bar Chart Approximation -->
+      <div *ngIf="!isLoadingSales() && salesData().length > 0" class="h-64 flex items-end justify-between gap-2 overflow-x-auto pb-4 px-2 custom-scrollbar">
+         <div *ngFor="let point of salesData()" class="flex flex-col items-center group relative min-w-[40px] flex-1">
+            <!-- Tooltip -->
+            <div class="absolute -top-10 opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap bg-slate-800 text-white text-xs py-1 px-2 rounded pointer-events-none z-10 transition duration-300">
+               {{ point._id }} - ₹{{ point.totalSales | number:'1.2-2' }}
+            </div>
+            
+            <!-- Bar -->
+            <!-- We calculate the height % by mapping against the max value -->
+            <div class="w-full bg-indigo-100 group-hover:bg-indigo-300 rounded-t-sm transition-colors relative overflow-hidden" 
+                 [style.height.%]="(point.totalSales / maxSaleValue()) * 100">
+                 <!-- Inner fill -->
+                 <div class="absolute bottom-0 left-0 right-0 bg-indigo-500 rounded-t-sm transition-all duration-1000" [style.height.%]="100"></div>
+            </div>
+            <span class="text-[10px] text-slate-400 mt-2 rotate-45 origin-left">{{ point._id | date:'M/d' }}</span>
+         </div>
+      </div>
+
+      <div *ngIf="!isLoadingSales() && salesData().length === 0" class="h-64 flex flex-col items-center justify-center space-y-4 text-slate-400">
+         <svg class="w-12 h-12" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 3v18h18"></path></svg>
+         <p>No revenue data generated yet.</p>
+      </div>
+    </div>
+
+    <!-- Top Products Container -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col">
+       <div class="flex items-center justify-between mb-6">
+         <h2 class="font-bold text-slate-900 font-outfit">Top Products</h2>
+       </div>
+
+       <div *ngIf="isLoadingProducts()" class="flex-1 flex flex-col items-center justify-center space-y-4">
+         <div class="w-8 h-8 border-2 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></div>
+       </div>
+
+       <div *ngIf="!isLoadingProducts()" class="flex-1 space-y-4 overflow-y-auto">
+          <div *ngFor="let prod of topProducts(); let i = index" class="flex items-center gap-4 p-3 hover:bg-slate-50 rounded-xl transition-colors border border-transparent hover:border-slate-100 group cursor-pointer">
+             <div class="w-8 flex justify-center text-lg font-black" [ngClass]="{'text-amber-500': i===0, 'text-slate-400': i===1, 'text-amber-700': i===2, 'text-slate-300': i>2}">
+                #{{ i + 1 }}
+             </div>
+             <div class="w-12 h-12 rounded-lg bg-slate-100 overflow-hidden border border-slate-200 flex-shrink-0">
+                <img *ngIf="prod.images && prod.images.length > 0" [src]="prod.images[0]" class="w-full h-full object-cover">
+                <svg *ngIf="!prod.images || prod.images.length === 0" class="w-full h-full text-slate-300 p-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+             </div>
+             <div class="flex-1 min-w-0">
+                <p class="font-bold text-slate-900 truncate text-sm">{{ prod.name }}</p>
+                <div class="flex items-center justify-between mt-1">
+                   <p class="text-xs text-indigo-600 font-bold">₹{{ prod.price | number:'1.2-2' }}</p>
+                   <p class="text-[10px] text-slate-500">{{ prod.stock }} left</p>
+                </div>
+             </div>
+          </div>
+
+          <div *ngIf="topProducts().length === 0" class="text-center text-slate-500 text-sm mt-8">
+             No products featured in the database.
+          </div>
+       </div>
+    </div>
+  </div>
+</div>

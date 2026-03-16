@@ -1,0 +1,60 @@
+<div class="wishlist-container bg-gray-50 min-h-screen pt-24 pb-16 font-inter">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex items-center justify-between mb-8">
+      <h1 class="text-2xl font-black text-gray-900 uppercase tracking-tight">My Wishlist <span class="text-sm text-gray-400 font-medium tracking-normal normal-case ml-2">({{ wishlistItems.length }} items)</span></h1>
+    </div>
+
+    <!-- Empty State -->
+    <div *ngIf="!isLoading && wishlistItems.length === 0" class="flex flex-col items-center justify-center py-20 bg-white rounded-2xl shadow-sm border border-gray-100">
+      <div class="w-32 h-32 mb-6 text-gray-200">
+        <svg fill="currentColor" viewBox="0 0 24 24">
+          <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+        </svg>
+      </div>
+      <h2 class="text-xl font-bold text-gray-800 mb-2">Your wishlist is lonely</h2>
+      <p class="text-gray-500 mb-8 max-w-sm text-center">Save your favorite items here and they will be waiting for you when you're ready to shop.</p>
+      <a routerLink="/products" class="bg-indigo-600 text-white px-8 py-3 rounded-full font-bold hover:bg-indigo-700 transition-colors shadow-lg shadow-indigo-600/30">
+        Start Shopping
+      </a>
+    </div>
+
+    <!-- Wishlist Grid -->
+    <div *ngIf="!isLoading && wishlistItems.length > 0" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+      
+      <div *ngFor="let product of wishlistItems" class="wishlist-card bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 group relative flex flex-col">
+        
+        <!-- Remove Button -->
+        <button (click)="removeFromWishlist(product._id)" class="absolute top-3 right-3 z-10 w-8 h-8 bg-white/90 backdrop-blur rounded-full flex items-center justify-center text-gray-400 hover:text-red-500 hover:bg-white shadow-sm transition-colors" title="Remove from wishlist">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+        </button>
+
+        <!-- Product Image -->
+        <a [routerLink]="['/products', product._id]" class="relative w-full pt-[125%] block overflow-hidden bg-gray-100">
+          <img [src]="product.images && product.images.length > 0 ? product.images[0] : 'assets/placeholder.png'" [alt]="product.name" class="absolute inset-0 w-full h-full object-cover group-hover:scale-105 transition-transform duration-500">
+        </a>
+
+        <!-- Product Details -->
+        <div class="p-4 flex flex-col flex-1">
+          <a [routerLink]="['/products', product._id]" class="block">
+            <h3 class="font-bold text-gray-900 text-sm truncate uppercase tracking-tight hover:text-indigo-600 transition-colors">{{ product.name }}</h3>
+            <p class="text-gray-500 text-xs mt-1">Official Licensed Product</p>
+          </a>
+          
+          <div class="mt-3 flex items-center space-x-2">
+            <span class="font-bold text-gray-900">₹{{ product.price }}</span>
+            <span *ngIf="product.basePrice" class="text-xs text-gray-400 line-through">₹{{ product.basePrice }}</span>
+          </div>
+
+          <div class="mt-auto pt-4 relative">
+             <!-- Action Button -->
+             <button (click)="moveToCart(product)" class="w-full bg-slate-900 text-white py-2.5 rounded-lg font-bold text-sm uppercase tracking-wide hover:bg-indigo-600 transition-colors overflow-hidden relative active:scale-95">
+               <span class="relative z-10">Move to Cart</span>
+             </button>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+</div>

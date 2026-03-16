@@ -1,0 +1,280 @@
+<div class="space-y-6 relative pb-20">
+  <!-- Header & Tabs -->
+  <div>
+    <h1 class="text-2xl font-bold font-outfit text-slate-900 tracking-tight">Catalog Management</h1>
+    <p class="text-sm text-slate-500 mt-1">Manage categories and the products within them.</p>
+
+    <div class="mt-6 border-b border-gray-200">
+      <nav class="-mb-px flex space-x-8 overflow-x-auto" aria-label="Tabs">
+        @for (tab of allowedTabs; track tab) {
+          <button
+            (click)="setActiveTab(tab)"
+            [class.border-indigo-500]="activeTab() === tab"
+            [class.text-indigo-600]="activeTab() === tab"
+            [class.border-transparent]="activeTab() !== tab"
+            [class.text-gray-500]="activeTab() !== tab"
+            class="whitespace-nowrap border-b-2 py-4 px-1 text-sm font-medium hover:border-gray-300 hover:text-gray-700 transition"
+          >
+            {{ tab }}
+          </button>
+        }
+      </nav>
+    </div>
+  </div>
+
+  <!-- Loading / Error States -->
+  @if (isLoading()) {
+    <div class="h-64 flex flex-col items-center justify-center space-y-4 bg-white rounded-2xl border border-gray-100 shadow-sm">
+      <div class="w-10 h-10 border-4 border-indigo-200 border-t-indigo-600 rounded-full animate-spin"></div>
+      <p class="text-slate-500 font-medium">Loading catalog...</p>
+    </div>
+  }
+
+  @if (error()) {
+    <div class="p-4 bg-rose-50 border border-rose-100 rounded-2xl text-rose-700 font-medium text-sm">
+        {{ error() }}
+    </div>
+  }
+
+  <!-- ==================== SPECIFIC CATEGORY TAB CONTENT ==================== -->
+  @if (!isLoading()) {
+    <!-- Category Details Section -->
+    @if (activeTab() !== 'New Arrivals' && activeTab() !== 'Featured') {
+      <div class="bg-gray-50 border border-gray-200 rounded-2xl p-6 flex items-start gap-6 shadow-sm mb-8">
+       <div class="w-48 aspect-video bg-gray-200 rounded-lg overflow-hidden flex-shrink-0 border border-gray-300">
+          @if (activeCategory()?.image) {
+             <img [src]="activeCategory()?.image" class="w-full h-full object-cover">
+          } @else {
+             <div class="w-full h-full flex flex-col items-center justify-center text-gray-400 p-4 text-center">
+                <svg class="w-8 h-8 mb-2 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                <span class="text-xs font-semibold uppercase tracking-wider">No Demo Image</span>
+             </div>
+          }
+       </div>
+       <div class="flex-grow">
+          <div class="flex items-center justify-between">
+             <h2 class="text-2xl font-black text-gray-900 uppercase tracking-tight">{{ activeCategory()?.name }}</h2>
+             <button (click)="openCategoryModal()" class="px-4 py-2 bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 shadow-sm rounded-lg text-sm font-semibold flex items-center gap-2 transition-colors">
+                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                Edit Category Info
+             </button>
+          </div>
+          <p class="text-sm text-gray-500 mt-2 max-w-2xl">{{ activeCategory()?.description || 'No description provided for this category.' }}</p>
+       </div>
+    </div>
+    }
+
+    <!-- Products Section -->
+    <div>
+      <div class="flex items-center justify-between mb-4">
+         <h2 class="text-lg font-bold text-gray-900">Products in {{ activeTab() }}</h2>
+         @if (activeTab() !== 'New Arrivals' && activeTab() !== 'Featured') {
+           <button (click)="openProductModal()" class="px-4 py-2 bg-indigo-600 text-white hover:bg-indigo-700 shadow-md rounded-lg text-sm font-semibold flex items-center gap-2">
+              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+              Add Product to {{ activeTab() }}
+           </button>
+         }
+      </div>
+
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left whitespace-nowrap">
+            <thead class="bg-slate-50 border-b border-gray-100 text-xs uppercase tracking-wider text-slate-500 font-semibold">
+              <tr>
+                <th class="px-6 py-4">Product</th>
+                <th class="px-6 py-4">Price</th>
+                <th class="px-6 py-4">Stock</th>
+                <th class="px-6 py-4">Sizes / Colors</th>
+                <th class="px-6 py-4 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-100">
+              @for (product of filteredProducts(); track product._id) {
+                <tr class="hover:bg-slate-50/50 transition-colors group">
+                  <td class="px-6 py-4">
+                    <div class="flex items-center gap-3">
+                      <div class="w-10 h-10 rounded-lg bg-slate-100 overflow-hidden border border-slate-200 flex-shrink-0">
+                         @if (product.images && product.images.length) {
+                           <img [src]="product.images[0]" class="w-full h-full object-cover">
+                         } @else {
+                           <svg class="w-full h-full text-slate-300 p-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path></svg>
+                         }
+                      </div>
+                      <div>
+                        <p class="font-semibold text-slate-900 truncate w-48">{{ product.name }}</p>
+                        <p class="text-xs text-slate-500">{{ product.brand || 'N/A' }}</p>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="px-6 py-4 font-medium text-slate-700">₹{{ product.price | number:'1.2-2' }}</td>
+                  <td class="px-6 py-4">
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold"
+                          [ngClass]="{'bg-rose-50 text-rose-700': product.stock === 0, 'bg-amber-50 text-amber-700': product.stock > 0 && product.stock <= 10, 'bg-emerald-50 text-emerald-700': product.stock > 10}">
+                      {{ product.stock }} units
+                    </span>
+                  </td>
+                  <td class="px-6 py-4 text-xs text-slate-500 truncate w-32">
+                     {{ product.sizes.join(', ') || 'N/A' }} <br/>
+                     <span class="text-gray-400">{{ product.colors.join(', ') || 'N/A' }}</span>
+                  </td>
+                  <td class="px-6 py-4 text-right space-x-2">
+                    <button (click)="openProductModal(product)" class="text-indigo-600 hover:text-indigo-800 p-1"><svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg></button>
+                    <button (click)="deleteProduct(product._id)" class="text-rose-600 hover:text-rose-800 p-1"><svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg></button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+          @if (filteredProducts().length === 0) {
+            <div class="p-12 text-center text-slate-500">No products found for this category.</div>
+          }
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- ==================== CATEGORY MODAL ==================== -->
+  @if (isCategoryModalOpen()) {
+    <div class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+      <div class="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden flex flex-col">
+        <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-slate-50">
+          <h3 class="font-bold text-lg">Edit Category ({{ activeCategory()?.name }})</h3>
+        </div>
+        <div class="p-6 space-y-4 text-sm">
+           <div>
+             <label class="block font-medium mb-1">Name (e.g., T-Shirts)</label>
+             <input [(ngModel)]="categoryForm().name" type="text" class="w-full border border-gray-300 rounded-md p-2" placeholder="T-Shirts">
+           </div>
+           <div>
+             <label class="block font-medium mb-1">Description (Optional)</label>
+             <textarea [(ngModel)]="categoryForm().description" class="w-full border border-gray-300 rounded-md p-2" rows="2"></textarea>
+           </div>
+           <div>
+              <label class="block font-medium mb-1">Demo Image</label>
+              <input type="file" accept="image/*" (change)="onCategoryFileSelected($event)" class="w-full text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
+              @if (categoryUploadError) { <p class="text-red-500 mt-1 text-xs">{{ categoryUploadError }}</p> }
+              @if (!categoryImageFile && categoryForm().image) {
+                <p class="text-xs text-gray-400 mt-1">Current Demo Image active. Upload new to replace.</p>
+              }
+           </div>
+        </div>
+        <div class="px-6 py-4 border-t flex justify-end gap-2 bg-slate-50">
+          <button (click)="isCategoryModalOpen.set(false)" class="px-4 py-2 font-medium text-slate-600 hover:bg-slate-200 rounded-lg">Cancel</button>
+          <button (click)="saveCategory()" [disabled]="isUploading" class="px-4 py-2 font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg disabled:opacity-50">
+            {{ isUploading ? 'Saving...' : 'Save Category' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- ==================== PRODUCT FORM MODAL ==================== -->
+  @if (isProductModalOpen()) {
+    <div class="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+      <div class="bg-white rounded-2xl shadow-xl w-full max-w-4xl overflow-hidden flex flex-col max-h-[95vh]">
+        <div class="px-6 py-4 border-b border-gray-100 flex justify-between items-center bg-slate-50">
+          <h3 class="font-bold text-lg text-slate-900">{{ editingProductId() ? 'Edit Product in ' : 'Add New Product to ' }} <span class="text-indigo-600">{{ activeTab() }}</span></h3>
+          <button (click)="isProductModalOpen.set(false)" class="text-slate-400 hover:text-slate-600"><svg class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
+        </div>
+        
+        <div class="p-6 overflow-y-auto flex-1 text-sm text-slate-700">
+           <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+              
+              <!-- Left Column: Details -->
+              <div class="space-y-4">
+                 <h4 class="font-bold text-gray-900 border-b pb-2">Product Details</h4>
+                 <div>
+                    <label class="block font-medium mb-1">Product Name *</label>
+                    <input [(ngModel)]="productForm().name" type="text" class="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-indigo-600 outline-none">
+                 </div>
+                 <div class="grid grid-cols-2 gap-4">
+                   <div>
+                      <label class="block font-medium mb-1">Price (₹) *</label>
+                      <input [(ngModel)]="productForm().price" type="number" class="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-indigo-600 outline-none">
+                   </div>
+                   <div>
+                      <label class="block font-medium mb-1">Stock Amount *</label>
+                      <input [(ngModel)]="productForm().stock" type="number" class="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-indigo-600 outline-none">
+                   </div>
+                 </div>
+                 <div>
+                    <label class="block font-medium mb-1">Brand</label>
+                    <input [(ngModel)]="productForm().brand" type="text" class="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-indigo-600 outline-none">
+                 </div>
+                 <div>
+                    <label class="block font-medium mb-1">Sizes (Comma separated)</label>
+                    <input [(ngModel)]="productForm().sizesText" type="text" placeholder="S, M, L, XL" class="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-indigo-600 outline-none">
+                 </div>
+                 <div>
+                    <label class="block font-medium mb-1">Colors (Comma separated)</label>
+                    <input [(ngModel)]="productForm().colorsText" type="text" placeholder="Red, Blue, Navy" class="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-indigo-600 outline-none">
+                 </div>
+                 <div>
+                    <label class="block font-medium mb-1">Description</label>
+                    <textarea [(ngModel)]="productForm().description" rows="3" class="w-full border border-gray-300 rounded-lg p-2.5 focus:ring-2 focus:ring-indigo-600 outline-none"></textarea>
+                 </div>
+                 <div class="flex items-center gap-2 mt-2">
+                    <input [(ngModel)]="productForm().isFeatured" type="checkbox" id="featured" class="w-4 h-4 text-indigo-600 rounded">
+                    <label for="featured" class="font-medium cursor-pointer">Mark as Featured Product</label>
+                 </div>
+                 <div class="flex items-center gap-2 mt-2">
+                    <input [(ngModel)]="productForm().isNewArrival" type="checkbox" id="newarrival" class="w-4 h-4 text-indigo-600 rounded">
+                    <label for="newarrival" class="font-medium cursor-pointer">Mark as New Arrival</label>
+                 </div>
+              </div>
+
+              <!-- Right Column: Images -->
+              <div class="space-y-4">
+                 <h4 class="font-bold text-gray-900 border-b pb-2 flex justify-between">
+                   Images (Optional)
+                   @if(productUploadError) { <span class="text-xs text-red-500 font-normal">{{ productUploadError }}</span> }
+                 </h4>
+                 <div class="grid grid-cols-2 gap-4">
+                    <!-- Image slots (up to 4) -->
+                    @for (slot of [0, 1, 2, 3]; track slot) {
+                      <div class="border-2 border-dashed border-gray-300 rounded-xl p-4 flex flex-col items-center justify-center text-center relative overflow-hidden group min-h-[120px] bg-slate-50">
+                         @if (productFiles[slot] || existingProductImageUrls[slot]) {
+                           <!-- File selected or existing image -->
+                           <div class="absolute inset-0 z-10 bg-black/60 opacity-0 group-hover:opacity-100 transition flex items-center justify-center">
+                              <label [for]="'img-upload-' + slot" class="text-white text-xs font-bold cursor-pointer hover:underline">Replace</label>
+                           </div>
+                            @if (existingProductImageUrls[slot] && !productFiles[slot]) {
+                              <img [src]="existingProductImageUrls[slot]" class="absolute inset-0 w-full h-full object-cover opacity-60">
+                            } @else {
+                              <div class="absolute inset-0 w-full h-full flex items-center justify-center bg-indigo-50">
+                                <svg class="w-10 h-10 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                              </div>
+                            }
+                           <span class="z-20 font-bold text-indigo-600 break-words w-full px-2 text-xs relative">
+                             {{ productFiles[slot]?.name || 'Existing Image' }}
+                           </span>
+                         } @else {
+                           <!-- Empty slot -->
+                           <svg class="h-8 w-8 text-gray-400 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 4v16m8-8H4"></path></svg>
+                           <label [for]="'img-upload-' + slot" class="text-indigo-600 hover:text-indigo-500 font-medium text-xs cursor-pointer">
+                             Upload Image {{ slot + 1 }}
+                           </label>
+                           <p class="text-[10px] text-gray-400 mt-1">PNG, JPG up to 5MB</p>
+                         }
+                         <input type="file" [id]="'img-upload-' + slot" [name]="'product-img-' + slot" class="sr-only" accept="image/*" (change)="onProductFileSelected($event, slot)">
+                      </div>
+                    }
+                 </div>
+                 <div class="bg-blue-50 text-blue-800 p-3 rounded-lg text-xs mt-4">
+                   <strong>Note:</strong> Multiple images will be shown in a gallery format on the product page. Ensure high-quality vertical (3:4) aspect ratios for best results.
+                 </div>
+              </div>
+
+           </div>
+        </div>
+
+        <div class="px-6 py-4 border-t border-gray-100 flex justify-end gap-3 bg-slate-50 mt-auto">
+          <button (click)="isProductModalOpen.set(false)" class="px-4 py-2 font-medium text-slate-600 hover:bg-slate-200 rounded-lg transition-colors">Cancel</button>
+          <button (click)="saveProduct()" [disabled]="isUploading" class="px-6 py-2 font-medium text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg transition-colors shadow-sm disabled:opacity-50">
+            {{ isUploading ? 'Uploading & Saving...' : 'Save Product' }}
+          </button>
+        </div>
+      </div>
+    </div>
+  }
+</div>

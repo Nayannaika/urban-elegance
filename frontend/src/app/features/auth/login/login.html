@@ -1,0 +1,179 @@
+<div class="login-container min-h-screen flex selection:bg-indigo-500 selection:text-white">
+  <!-- Left Side: Visual / Brand -->
+  <div class="hidden lg:flex lg:w-1/2 align-middle justify-center bg-cover bg-center relative"
+       style="background-image: url('https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=1600&auto=format&fit=crop');">
+      <div class="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center pointer-events-none">
+          <div class="text-center text-white px-8">
+              <h1 class="text-5xl font-extrabold tracking-tight mb-4 drop-shadow-lg font-outfit">Urban Elegance</h1>
+              <p class="text-xl font-light tracking-wide drop-shadow-md">Elevate your style. Discover the new collection.</p>
+          </div>
+      </div>
+  </div>
+
+  <!-- Right Side: Form Area -->
+  <div class="w-full lg:w-1/2 flex items-center justify-center p-8 sm:p-12 lg:p-24 bg-white/95 backdrop-blur-sm shadow-2xl relative overflow-hidden form-panel-enter">
+      <!-- Decorative blobs -->
+      <div class="absolute top-[-10%] right-[-10%] w-64 h-64 bg-indigo-500 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-blob"></div>
+      <div class="absolute bottom-[-10%] left-[-10%] w-64 h-64 bg-rose-500 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-blob animation-delay-2000"></div>
+
+      <div class="w-full max-w-md relative z-10">
+          <!-- Logo for Mobile -->
+          <div class="lg:hidden text-center mb-10">
+              <h1 class="text-4xl font-extrabold tracking-tight text-slate-900 font-outfit">Urban Elegance</h1>
+          </div>
+
+          <div class="text-center mb-10">
+              <h2 class="text-3xl font-bold text-slate-900 font-outfit tracking-tight">
+                  <ng-container *ngIf="loginState() === 'login'">Welcome Back</ng-container>
+                  <ng-container *ngIf="loginState() === 'setup2fa'">Secure Your Account</ng-container>
+                  <ng-container *ngIf="loginState() === 'verify2fa'">Admin Verification</ng-container>
+              </h2>
+              <p class="text-slate-500 mt-2 font-inter text-sm md:text-base">
+                  <ng-container *ngIf="loginState() === 'login'">Please enter your details to sign in.</ng-container>
+                  <ng-container *ngIf="loginState() === 'setup2fa'">Scan the QR code to set up Two-Factor Authentication.</ng-container>
+                  <ng-container *ngIf="loginState() === 'verify2fa'">Enter the 6-digit code from your authenticator app.</ng-container>
+              </p>
+          </div>
+
+          <!-- Error Alert -->
+          <div *ngIf="errorMessage()" class="mb-6 p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-600 text-sm font-medium flex items-center animate-fade-in shadow-sm">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+              </svg>
+              <span>{{ errorMessage() }}</span>
+          </div>
+
+          <!-- Login Form State -->
+          <ng-container *ngIf="loginState() === 'login'">
+              <form [formGroup]="loginForm" (ngSubmit)="onSubmitLogin()" class="space-y-6">
+                  <!-- Email Input -->
+                  <div class="space-y-1 group">
+                      <app-input
+                        label="Email Address"
+                        type="email"
+                        formControlName="email"
+                        placeholder="you@example.com"
+                        [controlErrors]="loginForm.get('email')?.errors"
+                        [controlTouched]="loginForm.get('email')?.touched || false"
+                        [errorMessages]="{ required: 'Email address is required.', email: 'Please enter a valid email address.' }"
+                      ></app-input>
+                  </div>
+
+                  <!-- Password Input -->
+                  <div class="space-y-1 group relative">
+                      <div class="absolute right-0 top-0 z-10">
+                          <a routerLink="/forgot-password" class="text-xs font-semibold text-indigo-600 hover:text-indigo-500 transition-colors">Forgot password?</a>
+                      </div>
+                      <app-input
+                        label="Password"
+                        type="password"
+                        formControlName="password"
+                        placeholder="••••••••"
+                        [controlErrors]="loginForm.get('password')?.errors"
+                        [controlTouched]="loginForm.get('password')?.touched || false"
+                        [errorMessages]="{ required: 'Password is required.', minlength: 'Password must be at least 6 characters.' }"
+                      ></app-input>
+                  </div>
+
+                  <!-- Submit Button -->
+                  <app-button
+                    type="submit"
+                    variant="primary"
+                    size="lg"
+                    [fullWidth]="true"
+                    [disabled]="loginForm.invalid || isLoading()"
+                    class="block mt-8 w-full group"
+                  >
+                      <span *ngIf="!isLoading()" class="flex items-center">
+                          Sign In
+                          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-2 group-hover:translate-x-1 transition-transform" viewBox="0 0 20 20" fill="currentColor">
+                              <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" />
+                          </svg>
+                      </span>
+                      <svg *ngIf="isLoading()" class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                      </svg>
+                  </app-button>
+              </form>
+
+              <div class="mt-8 text-center text-sm text-slate-500 font-inter">
+                  Don't have an account? 
+                  <a routerLink="/register" class="font-bold text-indigo-600 hover:text-indigo-500 transition-colors ml-1 border-b border-transparent hover:border-indigo-500 pb-0.5">Create account</a>
+              </div>
+          </ng-container>
+
+          <!-- 2FA Setup State -->
+          <ng-container *ngIf="loginState() === 'setup2fa'">
+              <div class="flex flex-col items-center animate-fade-in-up">
+                  <div class="bg-white p-4 rounded-2xl shadow-md border border-slate-100 mb-6 group cursor-pointer hover:shadow-lg transition-shadow">
+                      <img [src]="qrCodeUrl()" alt="2FA QR Code" class="w-48 h-48 object-contain transition-transform group-hover:scale-105 duration-300">
+                  </div>
+                  
+                  <form [formGroup]="twoFactorForm" (ngSubmit)="onSubmit2FA()" class="w-full space-y-6">
+                      <div class="space-y-1">
+                          <label for="setup-token" class="text-sm font-semibold text-slate-700 font-inter text-center block">Enter Code to Verify</label>
+                          <div class="relative max-w-xs mx-auto">
+                              <input type="text" id="setup-token" name="token" formControlName="token" maxlength="6" autocomplete="one-time-code"
+                                  class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all duration-300 outline-none text-slate-800 text-center text-2xl tracking-widest bg-slate-50 focus:bg-white placeholder-slate-300 shadow-sm" 
+                                  placeholder="000000">
+                          </div>
+                      </div>
+
+                      <button type="submit" [disabled]="twoFactorForm.invalid || isLoading()" 
+                          class="w-full max-w-xs mx-auto py-3.5 px-4 bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-500 hover:to-indigo-600 text-white font-bold rounded-xl shadow-lg transition-all transform hover:-translate-y-1 disabled:opacity-70 disabled:cursor-not-allowed flex justify-center items-center mt-6">
+                          <span *ngIf="!isLoading()">Verify & Enable</span>
+                          <svg *ngIf="isLoading()" class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                          </svg>
+                      </button>
+                      
+                      <button type="button" (click)="backToLogin()" class="w-full max-w-xs mx-auto py-3 text-sm font-semibold text-slate-500 hover:text-slate-800 transition-colors block text-center">
+                          Cancel
+                      </button>
+                  </form>
+              </div>
+          </ng-container>
+
+          <!-- 2FA Verify State -->
+          <ng-container *ngIf="loginState() === 'verify2fa'">
+              <div class="animate-fade-in-up">
+                  <div class="flex justify-center mb-6">
+                      <div class="w-16 h-16 bg-indigo-50 rounded-full flex items-center justify-center text-indigo-500 shadow-sm">
+                          <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                          </svg>
+                      </div>
+                  </div>
+
+                  <form [formGroup]="twoFactorForm" (ngSubmit)="onSubmit2FA()" class="space-y-6">
+                      <div class="space-y-1 group">
+                          <div class="relative">
+                              <input type="text" id="verify-token" name="token" formControlName="token" maxlength="6" autocomplete="one-time-code"
+                                  class="w-full px-4 py-4 rounded-xl border border-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all duration-300 outline-none text-slate-800 text-center text-3xl tracking-[0.5em] bg-slate-50 focus:bg-white placeholder-slate-300 shadow-sm" 
+                                  placeholder="------" autofocus>
+                          </div>
+                      </div>
+
+                      <button type="submit" [disabled]="twoFactorForm.invalid || isLoading()" 
+                          class="w-full py-4 px-4 bg-gradient-to-r from-slate-900 to-slate-800 hover:from-indigo-600 hover:to-indigo-700 text-white font-bold rounded-xl shadow-lg transition-all transform hover:-translate-y-1 disabled:opacity-70 disabled:cursor-not-allowed flex justify-center items-center mt-6">
+                          <span *ngIf="!isLoading()">Authenticate</span>
+                          <svg *ngIf="isLoading()" class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                          </svg>
+                      </button>
+                      
+                      <button type="button" (click)="backToLogin()" class="w-full py-3 flex items-center justify-center text-sm font-semibold text-slate-500 hover:text-slate-800 transition-colors group">
+                          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1 group-hover:-translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                          </svg>
+                          Return to Login
+                      </button>
+                  </form>
+              </div>
+          </ng-container>
+      </div>
+  </div>
+</div>

@@ -1,0 +1,60 @@
+<div class="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 py-12">
+  <!-- Header -->
+  <div class="mb-10 flex flex-col md:flex-row md:items-end justify-between gap-4">
+    <div>
+      <span class="text-tss-red font-black uppercase tracking-[0.2em] text-[10px] mb-2 block"
+        >Premium Collection</span
+      >
+      <h1 class="text-3xl md:text-5xl font-black text-gray-900 tracking-tighter">
+        @if (pageTitle().includes(' ')) {
+          {{ pageTitle().split(' ')[0] }} <span class="italic text-gray-400">{{ pageTitle().substring(pageTitle().indexOf(' ') + 1) }}</span>
+        } @else {
+          {{ pageTitle() }}
+        }
+      </h1>
+    </div>
+    <p class="text-gray-400 text-xs md:text-sm max-w-xs font-medium leading-relaxed">
+      {{ pageSubtitle() }}
+    </p>
+  </div>
+
+  <!-- Loading State -->
+  @if (isLoading()) {
+    <div class="flex flex-col items-center justify-center py-32 space-y-4">
+      <div class="relative w-16 h-16">
+        <div class="absolute inset-0 border-4 border-gray-100 rounded-full"></div>
+        <div class="absolute inset-0 border-4 border-t-tss-red rounded-full animate-spin"></div>
+      </div>
+      <p class="text-[10px] font-black uppercase tracking-widest text-gray-400 animate-pulse">
+        Loading Collection...
+      </p>
+    </div>
+  } @else {
+    <!-- Products Grid -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-8 gap-y-12">
+      @for (product of products(); track product._id) {
+        <app-product-card [product]="product" />
+      } @empty {
+        <div class="col-span-full py-20 text-center">
+          <div class="inline-block p-6 rounded-full bg-gray-50 mb-4 opacity-50">
+            <svg
+              class="w-12 h-12 text-gray-300"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                stroke-width="2"
+              />
+            </svg>
+          </div>
+          <h3 class="text-xl font-bold text-gray-900">No products found</h3>
+          <p class="text-gray-400 text-sm mt-2">Check back soon for our new collection.</p>
+        </div>
+      }
+    </div>
+  }
+</div>

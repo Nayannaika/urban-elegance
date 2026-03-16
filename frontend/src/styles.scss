@@ -1,0 +1,16 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@400;700&display=swap');
+
+:root {
+  --tss-red: #ED1C24;
+  --tss-gray: #E6E7E8;
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  @apply text-gray-900 bg-white;
+  margin: 0;
+}

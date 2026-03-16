@@ -1,0 +1,120 @@
+<div class="login-container min-h-screen flex selection:bg-indigo-500 selection:text-white">
+  <!-- Left Side: Visual / Brand -->
+  <div class="hidden lg:flex lg:w-1/2 align-middle justify-center bg-cover bg-center relative"
+       style="background-image: url('https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=1600&auto=format&fit=crop');">
+      <div class="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center pointer-events-none">
+          <div class="text-center text-white px-8">
+              <h1 class="text-5xl font-extrabold tracking-tight mb-4 drop-shadow-lg font-outfit">Urban Elegance</h1>
+              <p class="text-xl font-light tracking-wide drop-shadow-md">Elevate your style. Discover the new collection.</p>
+          </div>
+      </div>
+  </div>
+
+  <!-- Right Side: Form Area -->
+  <div class="w-full lg:w-1/2 flex items-center justify-center p-8 sm:p-12 lg:p-24 bg-white/95 backdrop-blur-sm shadow-2xl relative overflow-hidden form-panel-enter">
+      <!-- Decorative blobs -->
+      <div class="absolute top-[-10%] right-[-10%] w-64 h-64 bg-indigo-500 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-blob"></div>
+      <div class="absolute bottom-[-10%] left-[-10%] w-64 h-64 bg-rose-500 rounded-full mix-blend-multiply filter blur-3xl opacity-10 animate-blob animation-delay-2000"></div>
+
+      <div class="w-full max-w-md relative z-10">
+          <!-- Logo for Mobile -->
+          <div class="lg:hidden text-center mb-10">
+              <h1 class="text-4xl font-extrabold tracking-tight text-slate-900 font-outfit">Urban Elegance</h1>
+          </div>
+
+          <div class="text-center mb-10">
+              <h2 class="text-3xl font-bold text-slate-900 font-outfit tracking-tight">Create an Account</h2>
+              <p class="text-slate-500 mt-2 font-inter text-sm md:text-base">Please enter your details to register.</p>
+          </div>
+
+          <!-- Error Alert -->
+          <div *ngIf="errorMessage()" class="mb-6 p-4 rounded-xl bg-rose-50 border border-rose-200 text-rose-600 text-sm font-medium flex items-center animate-fade-in shadow-sm">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
+                  <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+              </svg>
+              <span>{{ errorMessage() }}</span>
+          </div>
+
+          <!-- Register Form -->
+          <form [formGroup]="registerForm" (ngSubmit)="onSubmitRegister()" class="space-y-6">
+              <!-- Name Input -->
+              <div class="space-y-1 group">
+                  <label for="name" class="text-sm font-semibold text-slate-700 font-inter transition-colors group-focus-within:text-indigo-600">Full Name</label>
+                  <div class="relative">
+                      <input type="text" id="name" name="name" formControlName="name" autocomplete="name"
+                          class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all duration-300 outline-none text-slate-800 bg-slate-50 focus:bg-white placeholder-slate-400 font-inter shadow-sm hover:border-slate-300" 
+                          placeholder="Your Name">
+                  </div>
+                  <p *ngIf="registerForm.get('name')?.touched && registerForm.get('name')?.invalid" class="text-xs text-rose-500 mt-1 animate-slide-down">Please enter your full name.</p>
+              </div>
+
+              <!-- Email Input -->
+              <div class="space-y-1 group">
+                  <label for="email" class="text-sm font-semibold text-slate-700 font-inter transition-colors group-focus-within:text-indigo-600">Email Address</label>
+                  <div class="relative">
+                      <input type="email" id="email" name="email" formControlName="email" autocomplete="email"
+                          class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all duration-300 outline-none text-slate-800 bg-slate-50 focus:bg-white placeholder-slate-400 font-inter shadow-sm hover:border-slate-300" 
+                          placeholder="you@example.com">
+                  </div>
+                  <p *ngIf="registerForm.get('email')?.touched && registerForm.get('email')?.invalid" class="text-xs text-rose-500 mt-1 animate-slide-down">Please enter a valid email address.</p>
+              </div>
+
+              <!-- Password Input -->
+              <div class="space-y-1 group">
+                  <label for="password" class="text-sm font-semibold text-slate-700 font-inter transition-colors group-focus-within:text-indigo-600">Password</label>
+                  <div class="relative">
+                      <input type="password" id="password" name="password" formControlName="password" autocomplete="new-password"
+                          class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all duration-300 outline-none text-slate-800 bg-slate-50 focus:bg-white placeholder-slate-400 font-inter shadow-sm hover:border-slate-300" 
+                          placeholder="••••••••">
+                  </div>
+                  <p *ngIf="registerForm.get('password')?.touched && registerForm.get('password')?.invalid" class="text-xs text-rose-500 mt-1 animate-slide-down">Password must be at least 6 characters.</p>
+              </div>
+
+              <!-- Confirm Password Input -->
+              <div class="space-y-1 group">
+                  <label for="confirmPassword" class="text-sm font-semibold text-slate-700 font-inter transition-colors group-focus-within:text-indigo-600">Confirm Password</label>
+                  <div class="relative">
+                      <input type="password" id="confirmPassword" name="confirmPassword" formControlName="confirmPassword" autocomplete="new-password"
+                          class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all duration-300 outline-none text-slate-800 bg-slate-50 focus:bg-white placeholder-slate-400 font-inter shadow-sm hover:border-slate-300" 
+                          placeholder="••••••••">
+                  </div>
+                  <p *ngIf="registerForm.get('confirmPassword')?.touched && registerForm.hasError('mismatch') && !registerForm.get('confirmPassword')?.errors" class="text-xs text-rose-500 mt-1 animate-slide-down">Passwords do not match.</p>
+              </div>
+
+              <!-- Phone Input -->
+              <div class="space-y-1 group">
+                  <label for="phone" class="text-sm font-semibold text-slate-700 font-inter transition-colors group-focus-within:text-indigo-600">Mobile Number</label>
+                  <div class="relative">
+                      <input type="tel" id="phone" name="phone" formControlName="phone" autocomplete="tel"
+                          class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-200 transition-all duration-300 outline-none text-slate-800 bg-slate-50 focus:bg-white placeholder-slate-400 font-inter shadow-sm hover:border-slate-300" 
+                          placeholder="10 digit mobile number">
+                  </div>
+                  <div *ngIf="registerForm.get('phone')?.touched && registerForm.get('phone')?.invalid" class="text-xs text-rose-500 mt-1 animate-slide-down">
+                      <p *ngIf="registerForm.get('phone')?.errors?.['required']">Mobile number is required.</p>
+                      <p *ngIf="registerForm.get('phone')?.errors?.['pattern']">Please enter a valid 10-digit mobile number.</p>
+                  </div>
+              </div>
+
+              <!-- Submit Button -->
+              <button type="submit" [disabled]="registerForm.invalid || isLoading()" 
+                  class="w-full py-3.5 px-4 bg-gradient-to-r from-slate-900 to-slate-800 hover:from-indigo-600 hover:to-indigo-700 text-white font-bold rounded-xl shadow-lg hover:shadow-indigo-500/30 transition-all duration-300 transform hover:-translate-y-1 active:translate-y-0 disabled:opacity-70 disabled:cursor-not-allowed disabled:transform-none flex justify-center mt-8 group font-inter">
+                  <span *ngIf="!isLoading()" class="flex items-center">
+                      Register
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 ml-2 group-hover:translate-x-1 transition-transform" viewBox="0 0 20 20" fill="currentColor">
+                          <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" />
+                      </svg>
+                  </span>
+                  <svg *ngIf="isLoading()" class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                      <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+              </button>
+          </form>
+
+          <div class="mt-8 text-center text-sm text-slate-500 font-inter">
+              Already have an account? 
+              <a routerLink="/login" class="font-bold text-indigo-600 hover:text-indigo-500 transition-colors ml-1 border-b border-transparent hover:border-indigo-500 pb-0.5">Login Here</a>
+          </div>
+      </div>
+  </div>
+</div>
